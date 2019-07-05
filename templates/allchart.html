@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="10">
+  <title>{{ title }}</title>
+  <script src='/static/Chart1.min.js'></script>
+</head>
+<style>
+        * {
+          box-sizing:border-box;
+          border-style: none;
+        }
+        
+        /* Create two equal columns that floats next to each other */
+        .column {
+          float: left;
+          width: 30%;
+          padding: 5%;
+        }
+        
+        /* Clear floats after the columns */
+        .row:after {
+          align-content: center;
+          content: "";
+          display: table;
+          clear: both;
+        }
+</style>
+<body>
+  <center>
+    <h1 style="font-family: 'Courier New', Courier, monospace">{{ title }}</h1>
+    <h2>Temperature in degrees celsius</h2>
+    <div style = "clear:both">
+        <div class="row">
+            <div class="column">
+                <b><div id="divch1"></div></b>
+                <canvas id="chartline" height="250" style="border: 1px solid black"></canvas>
+            </div>
+            <div class="column">
+                <b><div id="divch2"></div></b>
+                <canvas id="chartpie" height="250" style="border: 1px solid black"></canvas>
+            </div>
+            <div class="column">
+                <b><div id="divch3"></div></b>
+                <canvas id="chartbar" height="250" style="border: 1px solid black"></canvas>
+            </div>
+        </div>      
+    </div>
+
+    <div style="border: 3px">
+        <p style="font-size: 14pt; font-family: 'Courier New', Courier, monospace"><b>Current Temperature:</b> {{ temp }}</p>
+        <p style="font-size: 14pt; font-family: 'Courier New', Courier, monospace"><b>Current Humidity:</b> {{ hum }}</p>
+    </div>
+
+    <script>
+      var hr = new Date().getHours();
+      document.getElementById("divch1").innerHTML = hr + ":00 hours";
+      document.getElementById("divch2").innerHTML = hr + ":00 hours";
+      document.getElementById("divch3").innerHTML = hr + ":00 hours";
+    </script>
+
+    <script>
+      // bar chart data
+      var barData = {
+        labels : [
+          {% for item in labels %}
+            "{{ item }}",
+          {% endfor %}
+        ],
+
+        datasets : [{
+          fillColor: "rgba(151,187,205,0.2)",
+          strokeColor: "rgba(151,187,205,1)",
+          pointColor: "rgba(151,187,205,1)",
+          pointStrokeColor: "#fff",
+          pointHighlightFill: "#fff",
+          pointHighlightStroke: "rgba(151,187,205,1)",
+          bezierCurve : false,
+          data : [
+	    {% for item in values %}
+              {{ item }},
+            {% endfor %}]
+          }
+	]
+      }
+
+      Chart.defaults.global.animationSteps = 50;
+      Chart.defaults.global.tooltipYPadding = 16;
+      Chart.defaults.global.tooltipCornerRadius = 0;
+      Chart.defaults.global.tooltipTitleFontStyle = "normal";
+      Chart.defaults.global.tooltipFillColor = "rgba(0,0,0,0.8)";
+      Chart.defaults.global.animationEasing = "easeOutBounce";
+      Chart.defaults.global.responsive = false;
+      Chart.defaults.global.scaleLineColor = "black";
+      Chart.defaults.global.scaleFontSize = 16;
+
+      // get bar chart canvas
+      var mychart = document.getElementById("chartline").getContext("2d");
+
+      steps = 10
+      max = {{ max }}
+      // draw bar chart
+      var LineChartDemo = new Chart(mychart).Line(barData, {
+        scaleOverride: true,
+        scaleSteps: steps,
+        scaleStepWidth: Math.ceil(max / steps),
+        scaleStartValue: 0,
+        scaleShowVerticalLines: true,
+        scaleShowGridLines : true,
+        barShowStroke : true,
+        scaleShowLabels: true,
+        bezierCurve: false,
+      });
+
+    </script>
+       <script>
+            var pieData = [
+              {% for item, label, colors in set %}
+                {
+                  value: {{item}},
+                  label: "{{label}}",
+                  color : "{{colors}}"
+                },
+              {% endfor %}
+            ];
+      
+            // get bar chart canvas
+            var mychart = document.getElementById("chartpie").getContext("2d");
+            steps = 10
+            max = {{ max }}
+      
+            // draw pie chart
+            new Chart(document.getElementById("chartpie").getContext("2d")).Pie(pieData);
+      
+    </script>
+       <script>
+            // bar chart data
+            var barData = {
+              labels : [
+                {% for item in labels %}
+                 "{{ item }}",
+                {% endfor %}
+          ],
+      
+              datasets : [{
+                fillColor: "rgba(151,187,205,0.2)",
+                strokeColor: "rgba(151,187,205,1)",
+                pointColor: "rgba(151,187,205,1)",
+                data : [
+                  {% for item in values %}
+                     "{{ item }}",
+                    {% endfor %}
+              ]
+                }
+              ]
+            }
+      
+           // get bar chart canvas
+           var mychart = document.getElementById("chartbar").getContext("2d");
+      
+             steps = 10
+             max = {{max}}
+      
+           // draw bar chart
+           new Chart(mychart).Bar(barData, {
+             scaleOverride: true,
+             scaleSteps: steps,
+             scaleStepWidth: Math.ceil(max / steps),
+             scaleStartValue: 0,
+             scaleShowVerticalLines: true,
+             scaleShowGridLines : true,
+             barShowStroke : true,
+             scaleShowLabels: true
+             }
+           );
+      
+    </script>
+</center>
+</body>
+</html>
